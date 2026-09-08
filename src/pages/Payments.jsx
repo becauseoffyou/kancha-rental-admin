@@ -368,7 +368,7 @@ export default function Payments() {
 
                             {selectedPayment.proof_url ? (
                                 <img
-                                    src={`http://localhost:5000${selectedPayment.proof_url}`}
+                                    src={`http://kancha-rental-api-production.up.railway.app${selectedPayment.proof_url}`}
                                     alt="Bukti transfer"
                                     style={styles.proofImage}
                                 />
