@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import kanchaLogo from "../../../kancha-rental-admin/src/assets/logo_kancha.png";
+import kanchaLogo from "../assets/logo_kancha.png";
 import {
     FiHome,
     FiCalendar,
