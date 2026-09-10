@@ -111,6 +111,9 @@ export default function Verifications() {
             });
 
             loadPending();
+            window.dispatchEvent(
+                new Event("refresh-sidebar-badges")
+            );
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -174,6 +177,9 @@ export default function Verifications() {
             });
 
             loadPending();
+            window.dispatchEvent(
+                new Event("refresh-sidebar-badges")
+            );
         } catch (error) {
             Swal.fire({
                 icon: "error",

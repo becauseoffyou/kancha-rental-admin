@@ -16,15 +16,18 @@ export default function Sidebar() {
 
     const [waitingPaymentCount, setWaitingPaymentCount] = useState(0);
     const [bookingPreparationCount, setBookingPreparationCount] = useState(0);
+    const [verificationPendingCount, setVerificationPendingCount] = useState(0);
 
     const refreshSidebarBadges = async () => {
         try {
             const [
                 waitingPayments,
                 preparationCount,
+                verificationPending,
             ] = await Promise.all([
                 adminService.getWaitingPayments(),
                 adminService.getPreparationBookingCount(),
+                adminService.getPendingVerifications(),
             ]);
 
             setWaitingPaymentCount(
@@ -34,7 +37,9 @@ export default function Sidebar() {
             setBookingPreparationCount(
                 preparationCount
             );
-
+            setVerificationPendingCount(
+                verificationPending.length
+            );
         } catch (error) {
             console.error(
                 "Refresh sidebar badge error:",
@@ -95,6 +100,8 @@ export default function Sidebar() {
             name: "Verifikasi",
             path: "/verifications",
             icon: <FiUserCheck />,
+            badge: verificationPendingCount,
+
         },
         {
             name: "Laporan",

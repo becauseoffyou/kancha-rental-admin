@@ -247,6 +247,23 @@ const getPreparationBookingCount =
             result.data.total || 0
         );
     };
+
+const getPendingVerifications = async () => {
+    const response = await fetch(
+        `${API_URL}/verification/admin/pending`
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+        throw new Error(
+            result.message ||
+            "Gagal mengambil verifikasi pending"
+        );
+    }
+
+    return result.data || [];
+};
 const adminService = {
     getWaitingPayments,
     approvePayment,
@@ -258,6 +275,7 @@ const adminService = {
     payRemaining,
     handoverBooking,
     getPreparationBookingCount,
+    getPendingVerifications,
 };
 
 export default adminService;
