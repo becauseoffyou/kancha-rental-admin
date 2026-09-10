@@ -20,3 +20,87 @@ a {
   text-decoration: none;
   color: inherit;
 }
+
+/* =========================
+   KANCHA SWEET ALERT
+========================= */
+
+.kancha-swal {
+  width: 420px !important;
+  padding: 28px !important;
+  border-radius: 18px !important;
+  font-family: inherit !important;
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.18) !important;
+}
+
+.kancha-swal-title {
+  color: #111827 !important;
+  font-size: 21px !important;
+  font-weight: 700 !important;
+  padding-top: 5px !important;
+}
+
+.kancha-swal .swal2-actions {
+  width: 100%;
+  gap: 10px;
+  margin-top: 24px !important;
+}
+
+.kancha-confirm {
+  min-width: 125px;
+  padding: 11px 18px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #111827;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.kancha-confirm:hover {
+  background: #000000;
+  transform: translateY(-1px);
+}
+
+.kancha-cancel {
+  min-width: 100px;
+  padding: 11px 18px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.kancha-cancel:hover {
+  background: #f9fafb;
+}
+
+/* icon sedikit lebih compact */
+.kancha-swal .swal2-icon {
+  width: 64px;
+  height: 64px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+/* pastikan selalu di atas modal admin */
+.swal2-container {
+  z-index: 30000 !important;
+}

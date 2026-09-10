@@ -73,12 +73,36 @@ export default function Verifications() {
     const handleApprove = async (userId) => {
         const confirm = await Swal.fire({
             title: "Setujui Verifikasi?",
-            text: "Customer akan mendapatkan status VERIFIED.",
+            html: `
+        <div style="
+            color:#6b7280;
+            font-size:14px;
+            line-height:1.6;
+            margin-top:6px;
+        ">
+            Pastikan data identitas dan foto customer
+            sudah sesuai sebelum verifikasi disetujui.
+        </div>
+    `,
             icon: "question",
+
             showCancelButton: true,
+            reverseButtons: true,
+
             confirmButtonText: "Ya, Setujui",
             cancelButtonText: "Batal",
+
             confirmButtonColor: "#111827",
+            cancelButtonColor: "#f3f4f6",
+
+            customClass: {
+                popup: "kancha-swal",
+                title: "kancha-swal-title",
+                confirmButton: "kancha-confirm",
+                cancelButton: "kancha-cancel",
+            },
+
+            buttonsStyling: false,
         });
 
         if (!confirm.isConfirmed) return;
@@ -104,10 +128,24 @@ export default function Verifications() {
 
             await Swal.fire({
                 icon: "success",
-                title: "Berhasil",
-                text: "Customer berhasil diverifikasi.",
-                timer: 1400,
-                showConfirmButton: false,
+                title: "Verifikasi Berhasil",
+                html: `
+        <div style="
+            color:#6b7280;
+            font-size:14px;
+            line-height:1.6;
+        ">
+            Customer telah berhasil diverifikasi
+            dan sekarang dapat melakukan booking.
+        </div>
+    `,
+                confirmButtonText: "Selesai",
+                customClass: {
+                    popup: "kancha-swal",
+                    title: "kancha-swal-title",
+                    confirmButton: "kancha-confirm",
+                },
+                buttonsStyling: false,
             });
 
             loadPending();
@@ -744,7 +782,7 @@ const styles = {
     overlay: {
         position: "fixed",
         inset: 0,
-        zIndex: 9999,
+        zIndex: 1000,
         background: "rgba(17,24,39,.55)",
         display: "flex",
         justifyContent: "center",
