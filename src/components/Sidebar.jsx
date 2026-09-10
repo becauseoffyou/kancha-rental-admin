@@ -7,6 +7,7 @@ import {
     FiCamera,
     FiUsers,
     FiBarChart2,
+    FiUserCheck,
 } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import adminService from "../services/adminService";
@@ -91,10 +92,16 @@ export default function Sidebar() {
             icon: <FiUsers />,
         },
         {
+            name: "Verifikasi",
+            path: "/verifications",
+            icon: <FiUserCheck />,
+        },
+        {
             name: "Laporan",
             path: "/reports",
             icon: <FiBarChart2 />,
         },
+
     ];
 
     return (

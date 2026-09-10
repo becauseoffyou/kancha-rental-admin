@@ -13,6 +13,7 @@ import Equipment from "./pages/Equipment";
 import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import BookingDetail from "./pages/BookingDetail";
+import Verifications from "./pages/Verifications";
 
 export default function App() {
   return (
@@ -50,6 +51,11 @@ export default function App() {
           <Route
             path="/reports"
             element={<Reports />}
+          />
+
+          <Route
+            path="/verifications"
+            element={<Verifications />}
           />
         </Route>
       </Routes>
