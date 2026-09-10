@@ -20,6 +20,8 @@ export default function Verifications() {
     const [selected, setSelected] = useState(null);
     const [zoomKtp, setZoomKtp] = useState(1);
     const [zoomSelfie, setZoomSelfie] = useState(1);
+    const [previewImage, setPreviewImage] = useState(null);
+    const [previewZoom, setPreviewZoom] = useState(1);
 
     const loadPending = async () => {
         try {
@@ -263,8 +265,7 @@ export default function Verifications() {
                                 <tr key={item.id}>
                                     <td style={styles.td}>
                                         <strong>
-                                            {item.name ||
-                                                item.full_name}
+                                            {item.user_name || item.full_name}
                                         </strong>
                                     </td>
 
@@ -359,7 +360,7 @@ export default function Verifications() {
                                     <Info
                                         label="Nama"
                                         value={
-                                            selected.name ||
+                                            selected.user_name ||
                                             "-"
                                         }
                                     />
@@ -386,6 +387,12 @@ export default function Verifications() {
                                             selected.user_id ||
                                             "-"
                                         }
+                                    />
+                                    <Info
+                                        label="Tanggal Daftar"
+                                        value={formatDate(
+                                            selected.registered_at
+                                        )}
                                     />
                                 </div>
                             </div>
@@ -436,22 +443,24 @@ export default function Verifications() {
                             <div style={styles.documentGrid}>
                                 <ImageViewer
                                     title="Foto KTP"
-                                    src={
-                                        selected.ktp_image_url
-                                    }
+                                    src={selected.ktp_image_url}
                                     zoom={zoomKtp}
                                     setZoom={setZoomKtp}
+                                    onPreview={(src) => {
+                                        setPreviewImage(src);
+                                        setPreviewZoom(1);
+                                    }}
                                 />
 
                                 <ImageViewer
                                     title="Foto Selfie"
-                                    src={
-                                        selected.selfie_image_url
-                                    }
+                                    src={selected.selfie_image_url}
                                     zoom={zoomSelfie}
-                                    setZoom={
-                                        setZoomSelfie
-                                    }
+                                    setZoom={setZoomSelfie}
+                                    onPreview={(src) => {
+                                        setPreviewImage(src);
+                                        setPreviewZoom(1);
+                                    }}
                                 />
                             </div>
                         </div>
@@ -486,6 +495,70 @@ export default function Verifications() {
                     </div>
                 </div>
             )}
+
+            {previewImage && (
+                <div style={styles.previewOverlay}>
+                    <div style={styles.previewHeader}>
+                        <div style={styles.previewTools}>
+                            <button
+                                style={styles.previewButton}
+                                onClick={() =>
+                                    setPreviewZoom((prev) =>
+                                        Math.max(prev - 0.25, 0.5)
+                                    )
+                                }
+                            >
+                                <FiZoomOut />
+                            </button>
+
+                            <span style={styles.previewZoomText}>
+                                {Math.round(previewZoom * 100)}%
+                            </span>
+
+                            <button
+                                style={styles.previewButton}
+                                onClick={() =>
+                                    setPreviewZoom((prev) =>
+                                        Math.min(prev + 0.25, 5)
+                                    )
+                                }
+                            >
+                                <FiZoomIn />
+                            </button>
+
+                            <button
+                                style={styles.previewResetButton}
+                                onClick={() =>
+                                    setPreviewZoom(1)
+                                }
+                            >
+                                Reset
+                            </button>
+                        </div>
+
+                        <button
+                            style={styles.previewCloseButton}
+                            onClick={() => {
+                                setPreviewImage(null);
+                                setPreviewZoom(1);
+                            }}
+                        >
+                            <FiX size={24} />
+                        </button>
+                    </div>
+
+                    <div style={styles.previewBody}>
+                        <img
+                            src={previewImage}
+                            alt="Preview dokumen"
+                            style={{
+                                ...styles.previewImage,
+                                transform: `scale(${previewZoom})`,
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
@@ -509,6 +582,7 @@ function ImageViewer({
     src,
     zoom,
     setZoom,
+    onPreview,
 }) {
     const zoomIn = () => {
         setZoom((prev) =>
@@ -555,9 +629,11 @@ function ImageViewer({
                     <img
                         src={src}
                         alt={title}
+                        onClick={() => onPreview(src)}
                         style={{
                             ...styles.documentImage,
                             transform: `scale(${zoom})`,
+                            cursor: "zoom-in",
                         }}
                     />
                 ) : (
@@ -854,5 +930,87 @@ const styles = {
         color: "#fff",
         fontWeight: 700,
         cursor: "pointer",
+    },
+    previewOverlay: {
+        position: "fixed",
+        inset: 0,
+        zIndex: 20000,
+        background: "rgba(0,0,0,.92)",
+        display: "flex",
+        flexDirection: "column",
+    },
+
+    previewHeader: {
+        height: 64,
+        padding: "0 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottom: "1px solid rgba(255,255,255,.15)",
+    },
+
+    previewTools: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+    },
+
+    previewButton: {
+        width: 38,
+        height: 38,
+        border: "1px solid rgba(255,255,255,.25)",
+        background: "rgba(255,255,255,.1)",
+        color: "#fff",
+        borderRadius: 8,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+    },
+
+    previewResetButton: {
+        height: 38,
+        padding: "0 14px",
+        border: "1px solid rgba(255,255,255,.25)",
+        background: "rgba(255,255,255,.1)",
+        color: "#fff",
+        borderRadius: 8,
+        cursor: "pointer",
+    },
+
+    previewZoomText: {
+        color: "#fff",
+        minWidth: 48,
+        textAlign: "center",
+        fontSize: 12,
+    },
+
+    previewCloseButton: {
+        width: 40,
+        height: 40,
+        border: 0,
+        borderRadius: 8,
+        background: "#dc2626",
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        cursor: "pointer",
+    },
+
+    previewBody: {
+        flex: 1,
+        overflow: "auto",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 40,
+    },
+
+    previewImage: {
+        maxWidth: "90%",
+        maxHeight: "80vh",
+        objectFit: "contain",
+        transition: "transform .15s ease",
     },
 };
