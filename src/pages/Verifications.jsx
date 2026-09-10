@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import {
+    FiEye,
+    FiX,
+    FiZoomIn,
+    FiZoomOut,
+    FiCheck,
+    FiXCircle,
+} from "react-icons/fi";
 
 const API_URL =
     import.meta.env.VITE_API_URL ||
@@ -8,6 +16,10 @@ const API_URL =
 export default function Verifications() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    const [selected, setSelected] = useState(null);
+    const [zoomKtp, setZoomKtp] = useState(1);
+    const [zoomSelfie, setZoomSelfie] = useState(1);
 
     const loadPending = async () => {
         try {
@@ -44,6 +56,18 @@ export default function Verifications() {
         loadPending();
     }, []);
 
+    const openDetail = (item) => {
+        setSelected(item);
+        setZoomKtp(1);
+        setZoomSelfie(1);
+    };
+
+    const closeDetail = () => {
+        setSelected(null);
+        setZoomKtp(1);
+        setZoomSelfie(1);
+    };
+
     const handleApprove = async (userId) => {
         const confirm = await Swal.fire({
             title: "Setujui Verifikasi?",
@@ -74,11 +98,13 @@ export default function Verifications() {
                 );
             }
 
+            closeDetail();
+
             await Swal.fire({
                 icon: "success",
                 title: "Berhasil",
                 text: "Customer berhasil diverifikasi.",
-                timer: 1500,
+                timer: 1400,
                 showConfirmButton: false,
             });
 
@@ -104,7 +130,7 @@ export default function Verifications() {
             cancelButtonText: "Batal",
             confirmButtonColor: "#dc2626",
             inputValidator: (value) => {
-                if (!value) {
+                if (!value?.trim()) {
                     return "Alasan penolakan wajib diisi";
                 }
             },
@@ -126,7 +152,8 @@ export default function Verifications() {
                 }
             );
 
-            const responseData = await response.json();
+            const responseData =
+                await response.json();
 
             if (!response.ok) {
                 throw new Error(
@@ -135,10 +162,12 @@ export default function Verifications() {
                 );
             }
 
+            closeDetail();
+
             await Swal.fire({
                 icon: "success",
                 title: "Verifikasi Ditolak",
-                timer: 1500,
+                timer: 1400,
                 showConfirmButton: false,
             });
 
@@ -152,8 +181,21 @@ export default function Verifications() {
         }
     };
 
+    const formatDate = (date) => {
+        if (!date) return "-";
+
+        return new Date(date).toLocaleString("id-ID", {
+            dateStyle: "medium",
+            timeStyle: "short",
+        });
+    };
+
     if (loading) {
-        return <div>Memuat data verifikasi...</div>;
+        return (
+            <div style={styles.page}>
+                Memuat data verifikasi...
+            </div>
+        );
     }
 
     return (
@@ -165,8 +207,8 @@ export default function Verifications() {
                     </h1>
 
                     <p style={styles.subtitle}>
-                        Review data identitas customer
-                        yang menunggu persetujuan.
+                        Customer yang menunggu
+                        verifikasi identitas.
                     </p>
                 </div>
 
@@ -175,89 +217,355 @@ export default function Verifications() {
                 </div>
             </div>
 
-            {data.length === 0 ? (
-                <div style={styles.empty}>
-                    Tidak ada verifikasi yang menunggu.
-                </div>
-            ) : (
-                <div style={styles.grid}>
-                    {data.map((item) => (
-                        <div
-                            key={item.id}
-                            style={styles.card}
-                        >
-                            <div style={styles.customerInfo}>
-                                <h3 style={styles.name}>
-                                    {item.name ||
-                                        item.full_name}
+            <div style={styles.tableCard}>
+                <table style={styles.table}>
+                    <thead>
+                        <tr>
+                            <th style={styles.th}>
+                                Customer
+                            </th>
+
+                            <th style={styles.th}>
+                                Email
+                            </th>
+
+                            <th style={styles.th}>
+                                NIK
+                            </th>
+
+                            <th style={styles.th}>
+                                Status
+                            </th>
+
+                            <th style={styles.th}>
+                                Tanggal Submit
+                            </th>
+
+                            <th style={styles.th}>
+                                Aksi
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {data.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan="6"
+                                    style={styles.empty}
+                                >
+                                    Tidak ada verifikasi
+                                    yang menunggu.
+                                </td>
+                            </tr>
+                        ) : (
+                            data.map((item) => (
+                                <tr key={item.id}>
+                                    <td style={styles.td}>
+                                        <strong>
+                                            {item.name ||
+                                                item.full_name}
+                                        </strong>
+                                    </td>
+
+                                    <td style={styles.td}>
+                                        {item.email || "-"}
+                                    </td>
+
+                                    <td style={styles.td}>
+                                        {item.nik || "-"}
+                                    </td>
+
+                                    <td style={styles.td}>
+                                        <span
+                                            style={
+                                                styles.pendingBadge
+                                            }
+                                        >
+                                            PENDING
+                                        </span>
+                                    </td>
+
+                                    <td style={styles.td}>
+                                        {formatDate(
+                                            item.submitted_at
+                                        )}
+                                    </td>
+
+                                    <td style={styles.td}>
+                                        <button
+                                            type="button"
+                                            style={
+                                                styles.detailButton
+                                            }
+                                            onClick={() =>
+                                                openDetail(item)
+                                            }
+                                        >
+                                            <FiEye />
+                                            Detail
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {selected && (
+                <div style={styles.overlay}>
+                    <div style={styles.modal}>
+                        <div style={styles.modalHeader}>
+                            <div>
+                                <h2
+                                    style={
+                                        styles.modalTitle
+                                    }
+                                >
+                                    Detail Verifikasi
+                                </h2>
+
+                                <span
+                                    style={
+                                        styles.modalSubtitle
+                                    }
+                                >
+                                    Review data customer
+                                    sebelum approval.
+                                </span>
+                            </div>
+
+                            <button
+                                type="button"
+                                style={styles.closeButton}
+                                onClick={closeDetail}
+                            >
+                                <FiX size={22} />
+                            </button>
+                        </div>
+
+                        <div style={styles.modalBody}>
+                            <div style={styles.section}>
+                                <h3
+                                    style={
+                                        styles.sectionTitle
+                                    }
+                                >
+                                    Data Register
                                 </h3>
 
-                                <span style={styles.email}>
-                                    {item.email}
-                                </span>
-
-                                <span style={styles.nik}>
-                                    NIK: {item.nik}
-                                </span>
-                            </div>
-
-                            <div style={styles.imageGrid}>
-                                <div>
-                                    <div style={styles.imageLabel}>
-                                        KTP
-                                    </div>
-
-                                    <img
-                                        src={item.ktp_image_url}
-                                        alt="KTP"
-                                        style={styles.image}
-                                    />
-                                </div>
-
-                                <div>
-                                    <div style={styles.imageLabel}>
-                                        Selfie
-                                    </div>
-
-                                    <img
-                                        src={
-                                            item.selfie_image_url
+                                <div style={styles.infoGrid}>
+                                    <Info
+                                        label="Nama"
+                                        value={
+                                            selected.name ||
+                                            "-"
                                         }
-                                        alt="Selfie"
-                                        style={styles.image}
+                                    />
+
+                                    <Info
+                                        label="Email"
+                                        value={
+                                            selected.email ||
+                                            "-"
+                                        }
+                                    />
+
+                                    <Info
+                                        label="No. Telepon"
+                                        value={
+                                            selected.phone ||
+                                            "-"
+                                        }
+                                    />
+
+                                    <Info
+                                        label="User ID"
+                                        value={
+                                            selected.user_id ||
+                                            "-"
+                                        }
                                     />
                                 </div>
                             </div>
 
-                            <div style={styles.actions}>
-                                <button
-                                    type="button"
-                                    style={styles.rejectButton}
-                                    onClick={() =>
-                                        handleReject(
-                                            item.user_id
-                                        )
+                            <div style={styles.section}>
+                                <h3
+                                    style={
+                                        styles.sectionTitle
                                     }
                                 >
-                                    Tolak
-                                </button>
+                                    Data Verifikasi
+                                </h3>
 
-                                <button
-                                    type="button"
-                                    style={styles.approveButton}
-                                    onClick={() =>
-                                        handleApprove(
-                                            item.user_id
-                                        )
+                                <div style={styles.infoGrid}>
+                                    <Info
+                                        label="Nama Sesuai KTP"
+                                        value={
+                                            selected.full_name ||
+                                            "-"
+                                        }
+                                    />
+
+                                    <Info
+                                        label="NIK"
+                                        value={
+                                            selected.nik ||
+                                            "-"
+                                        }
+                                    />
+
+                                    <Info
+                                        label="Status"
+                                        value={
+                                            selected.verification_status ||
+                                            "PENDING"
+                                        }
+                                    />
+
+                                    <Info
+                                        label="Tanggal Submit"
+                                        value={formatDate(
+                                            selected.submitted_at
+                                        )}
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={styles.documentGrid}>
+                                <ImageViewer
+                                    title="Foto KTP"
+                                    src={
+                                        selected.ktp_image_url
                                     }
-                                >
-                                    Setujui
-                                </button>
+                                    zoom={zoomKtp}
+                                    setZoom={setZoomKtp}
+                                />
+
+                                <ImageViewer
+                                    title="Foto Selfie"
+                                    src={
+                                        selected.selfie_image_url
+                                    }
+                                    zoom={zoomSelfie}
+                                    setZoom={
+                                        setZoomSelfie
+                                    }
+                                />
                             </div>
                         </div>
-                    ))}
+
+                        <div style={styles.modalFooter}>
+                            <button
+                                type="button"
+                                style={styles.rejectButton}
+                                onClick={() =>
+                                    handleReject(
+                                        selected.user_id
+                                    )
+                                }
+                            >
+                                <FiXCircle />
+                                Tolak
+                            </button>
+
+                            <button
+                                type="button"
+                                style={styles.approveButton}
+                                onClick={() =>
+                                    handleApprove(
+                                        selected.user_id
+                                    )
+                                }
+                            >
+                                <FiCheck />
+                                Setujui
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+function Info({ label, value }) {
+    return (
+        <div style={styles.infoItem}>
+            <span style={styles.infoLabel}>
+                {label}
+            </span>
+
+            <strong style={styles.infoValue}>
+                {value}
+            </strong>
+        </div>
+    );
+}
+
+function ImageViewer({
+    title,
+    src,
+    zoom,
+    setZoom,
+}) {
+    const zoomIn = () => {
+        setZoom((prev) =>
+            Math.min(prev + 0.25, 3)
+        );
+    };
+
+    const zoomOut = () => {
+        setZoom((prev) =>
+            Math.max(prev - 0.25, 0.5)
+        );
+    };
+
+    return (
+        <div style={styles.imageCard}>
+            <div style={styles.imageHeader}>
+                <strong>{title}</strong>
+
+                <div style={styles.zoomActions}>
+                    <button
+                        type="button"
+                        style={styles.zoomButton}
+                        onClick={zoomOut}
+                    >
+                        <FiZoomOut />
+                    </button>
+
+                    <span style={styles.zoomText}>
+                        {Math.round(zoom * 100)}%
+                    </span>
+
+                    <button
+                        type="button"
+                        style={styles.zoomButton}
+                        onClick={zoomIn}
+                    >
+                        <FiZoomIn />
+                    </button>
+                </div>
+            </div>
+
+            <div style={styles.imageViewport}>
+                {src ? (
+                    <img
+                        src={src}
+                        alt={title}
+                        style={{
+                            ...styles.documentImage,
+                            transform: `scale(${zoom})`,
+                        }}
+                    />
+                ) : (
+                    <div style={styles.noImage}>
+                        Gambar tidak tersedia
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
@@ -269,9 +577,9 @@ const styles = {
 
     header: {
         display: "flex",
-        alignItems: "center",
         justifyContent: "space-between",
-        marginBottom: 25,
+        alignItems: "center",
+        marginBottom: 24,
     },
 
     title: {
@@ -282,111 +590,269 @@ const styles = {
 
     subtitle: {
         margin: "6px 0 0",
-        color: "#6b7280",
         fontSize: 13,
+        color: "#6b7280",
     },
 
     count: {
+        padding: "8px 13px",
         background: "#fef3c7",
         color: "#92400e",
-        padding: "8px 12px",
         borderRadius: 999,
         fontSize: 12,
         fontWeight: 700,
     },
 
-    grid: {
-        display: "grid",
-        gridTemplateColumns:
-            "repeat(auto-fit, minmax(380px, 1fr))",
-        gap: 20,
-    },
-
-    card: {
+    tableCard: {
+        background: "#fff",
         border: "1px solid #e5e7eb",
         borderRadius: 14,
-        padding: 18,
-        background: "#ffffff",
+        overflow: "hidden",
     },
 
-    customerInfo: {
-        display: "flex",
-        flexDirection: "column",
-        gap: 4,
-        marginBottom: 15,
+    table: {
+        width: "100%",
+        borderCollapse: "collapse",
     },
 
-    name: {
-        margin: 0,
-        color: "#111827",
-    },
-
-    email: {
-        fontSize: 12,
+    th: {
+        padding: "13px 16px",
+        textAlign: "left",
+        fontSize: 11,
         color: "#6b7280",
+        background: "#f9fafb",
+        borderBottom: "1px solid #e5e7eb",
     },
 
-    nik: {
+    td: {
+        padding: "14px 16px",
         fontSize: 12,
         color: "#374151",
+        borderBottom: "1px solid #f3f4f6",
+    },
+
+    pendingBadge: {
+        display: "inline-block",
+        padding: "5px 9px",
+        borderRadius: 999,
+        background: "#fef3c7",
+        color: "#92400e",
+        fontSize: 10,
+        fontWeight: 700,
+    },
+
+    detailButton: {
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        border: "1px solid #d1d5db",
+        background: "#fff",
+        padding: "7px 10px",
+        borderRadius: 8,
+        cursor: "pointer",
         fontWeight: 600,
     },
 
-    imageGrid: {
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: 12,
-    },
-
-    imageLabel: {
-        fontSize: 11,
-        fontWeight: 700,
-        marginBottom: 6,
+    empty: {
+        padding: 35,
+        textAlign: "center",
         color: "#6b7280",
     },
 
-    image: {
-        width: "100%",
-        height: 220,
-        objectFit: "contain",
-        borderRadius: 10,
-        background: "#f9fafb",
-        border: "1px solid #e5e7eb",
-    },
-
-    actions: {
+    overlay: {
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(17,24,39,.55)",
         display: "flex",
-        gap: 10,
-        marginTop: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
     },
 
-    approveButton: {
-        flex: 1,
+    modal: {
+        width: "100%",
+        maxWidth: 1050,
+        maxHeight: "92vh",
+        background: "#fff",
+        borderRadius: 16,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        boxShadow:
+            "0 25px 60px rgba(0,0,0,.25)",
+    },
+
+    modalHeader: {
+        padding: "18px 22px",
+        borderBottom: "1px solid #e5e7eb",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+
+    modalTitle: {
+        margin: 0,
+        fontSize: 20,
+    },
+
+    modalSubtitle: {
+        fontSize: 12,
+        color: "#6b7280",
+    },
+
+    closeButton: {
+        width: 38,
+        height: 38,
         border: 0,
-        padding: 12,
         borderRadius: 9,
-        background: "#111827",
-        color: "#ffffff",
-        fontWeight: 700,
+        background: "#f3f4f6",
+        cursor: "pointer",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    modalBody: {
+        overflowY: "auto",
+        padding: 22,
+    },
+
+    section: {
+        marginBottom: 24,
+    },
+
+    sectionTitle: {
+        fontSize: 14,
+        margin: "0 0 12px",
+        color: "#111827",
+    },
+
+    infoGrid: {
+        display: "grid",
+        gridTemplateColumns:
+            "repeat(4, minmax(0,1fr))",
+        gap: 12,
+    },
+
+    infoItem: {
+        background: "#f9fafb",
+        borderRadius: 9,
+        padding: 12,
+    },
+
+    infoLabel: {
+        display: "block",
+        fontSize: 10,
+        color: "#6b7280",
+        marginBottom: 4,
+    },
+
+    infoValue: {
+        fontSize: 12,
+        color: "#111827",
+        wordBreak: "break-word",
+    },
+
+    documentGrid: {
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: 18,
+    },
+
+    imageCard: {
+        border: "1px solid #e5e7eb",
+        borderRadius: 12,
+        overflow: "hidden",
+    },
+
+    imageHeader: {
+        height: 48,
+        padding: "0 14px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderBottom: "1px solid #e5e7eb",
+        fontSize: 12,
+    },
+
+    zoomActions: {
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+    },
+
+    zoomButton: {
+        width: 30,
+        height: 30,
+        border: "1px solid #d1d5db",
+        background: "#fff",
+        borderRadius: 7,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
         cursor: "pointer",
     },
 
+    zoomText: {
+        minWidth: 42,
+        textAlign: "center",
+        fontSize: 10,
+        color: "#6b7280",
+    },
+
+    imageViewport: {
+        height: 330,
+        overflow: "auto",
+        background: "#f3f4f6",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    documentImage: {
+        maxWidth: "90%",
+        maxHeight: "90%",
+        objectFit: "contain",
+        transition: "transform .15s ease",
+    },
+
+    noImage: {
+        fontSize: 12,
+        color: "#9ca3af",
+    },
+
+    modalFooter: {
+        padding: "15px 22px",
+        borderTop: "1px solid #e5e7eb",
+        display: "flex",
+        justifyContent: "flex-end",
+        gap: 10,
+    },
+
     rejectButton: {
-        flex: 1,
-        border: "1px solid #dc2626",
-        padding: 12,
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+        padding: "10px 18px",
         borderRadius: 9,
-        background: "#ffffff",
+        border: "1px solid #dc2626",
+        background: "#fff",
         color: "#dc2626",
         fontWeight: 700,
         cursor: "pointer",
     },
 
-    empty: {
-        padding: 30,
-        textAlign: "center",
-        border: "1px dashed #d1d5db",
-        borderRadius: 12,
-        color: "#6b7280",
+    approveButton: {
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+        padding: "10px 18px",
+        borderRadius: 9,
+        border: 0,
+        background: "#111827",
+        color: "#fff",
+        fontWeight: 700,
+        cursor: "pointer",
     },
 };
