@@ -761,8 +761,9 @@ export default function BookingDetail() {
                             </strong>
 
                             <div style={styles.muted}>
-                                Tandai jika seluruh equipment
-                                sudah siap untuk diambil.
+                                {booking.pickup_method === "DELIVERY"
+                                    ? "Tandai jika seluruh equipment sudah siap untuk dikirim."
+                                    : "Tandai jika seluruh equipment sudah siap untuk diambil."}
                             </div>
                         </div>
 
@@ -771,7 +772,9 @@ export default function BookingDetail() {
                             onClick={handleReady}
                             disabled={processing}
                         >
-                            Siap Diambil
+                            {booking.pickup_method === "DELIVERY"
+                                ? "Siap Dikirim"
+                                : "Siap Diambil"}
                         </button>
                     </div>
                 )}
