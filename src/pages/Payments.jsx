@@ -252,14 +252,31 @@ export default function Payments() {
                                                     styles.td
                                                 }
                                             >
-                                                <span
-                                                    style={
-                                                        styles.status
-                                                    }
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        gap: 8,
+                                                    }}
                                                 >
-                                                    Menunggu
-                                                    Verifikasi
-                                                </span>
+                                                    {payment.payment_status === "REJECTED" && (
+                                                        <span style={styles.rejectedStamp}>
+                                                            REJECTED
+                                                        </span>
+                                                    )}
+
+                                                    <span
+                                                        style={
+                                                            payment.payment_status === "REJECTED"
+                                                                ? styles.statusRejected
+                                                                : styles.status
+                                                        }
+                                                    >
+                                                        {payment.payment_status === "REJECTED"
+                                                            ? "Ditolak"
+                                                            : "Menunggu Verifikasi"}
+                                                    </span>
+                                                </div>
                                             </td>
 
                                             <td
@@ -763,5 +780,28 @@ const styles = {
         borderRadius: 9,
         cursor: "pointer",
         fontWeight: 700,
+    },
+    rejectedStamp: {
+        display: "inline-block",
+        color: "#dc2626",
+        border: "2px solid #dc2626",
+        borderRadius: 4,
+        padding: "3px 6px",
+        fontSize: 8,
+        fontWeight: 900,
+        letterSpacing: 1,
+        transform: "rotate(-8deg)",
+        opacity: 0.8,
+        whiteSpace: "nowrap",
+    },
+
+    statusRejected: {
+        background: "#fef2f2",
+        color: "#dc2626",
+        padding: "6px 9px",
+        borderRadius: 20,
+        fontSize: 10,
+        fontWeight: 700,
+        whiteSpace: "nowrap",
     },
 };
