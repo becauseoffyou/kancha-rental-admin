@@ -431,7 +431,7 @@ export default function BookingDetail() {
                 </Card>
 
 
-                <Card title="Rental">
+                <Card title="Durasi Sewa">
                     <Info
                         label="Mulai"
                         value={formatDate(
@@ -453,15 +453,28 @@ export default function BookingDetail() {
                         }
                     />
 
-                    {booking.pickup_method ===
-                        "DELIVERY" && (
+                    {booking.pickup_method === "DELIVERY" && (
+                        <>
                             <Info
                                 label="Alamat"
-                                value={
-                                    booking.delivery_address
-                                }
+                                value={booking.delivery_address}
                             />
-                        )}
+
+                            <Info
+                                label="Jarak"
+                                value={`${Number(
+                                    booking.delivery_distance_km || 0
+                                ).toFixed(2)} km`}
+                            />
+
+                            <Info
+                                label="Biaya Delivery"
+                                value={formatRupiah(
+                                    booking.delivery_fee
+                                )}
+                            />
+                        </>
+                    )}
                 </Card>
 
 
